@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nutrition" />
+  <meta name="theme-color" content="#0f1117" />
+  <title>Food Nutrition</title>
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="apple-touch-icon" href="/static/icon-192.png" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- Tab bar -->
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="log" onclick="switchTab('log')">
+      <span class="tab-icon">🍽️</span>
+      <span class="tab-label">Log</span>
+    </button>
+    <button class="tab" data-tab="today" onclick="switchTab('today')">
+      <span class="tab-icon">📊</span>
+      <span class="tab-label">Today</span>
+    </button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">History</span>
+    </button>
+  </nav>
+
+  <main class="app">
+
+    <!-- ── LOG TAB ── -->
+    <section id="tab-log" class="tab-content active">
+      <div class="screen-header">
+        <h1>What did you eat?</h1>
+      </div>
+
+      <div class="input-card">
+        <textarea id="food-input"
+          placeholder="e.g. 2 scrambled eggs and toast with butter&#10;or: large Big Mac meal with Coke"
+          rows="3"></textarea>
+        <div class="meal-type-row">
+          <label class="meal-type-label">Meal</label>
+          <div class="meal-chips">
+            <button class="chip active" data-type="breakfast" onclick="selectMealType(this)">Breakfast</button>
+            <button class="chip" data-type="lunch" onclick="selectMealType(this)">Lunch</button>
+            <button class="chip" data-type="dinner" onclick="selectMealType(this)">Dinner</button>
+            <button class="chip" data-type="snack" onclick="selectMealType(this)">Snack</button>
+          </div>
+        </div>
+        <button id="analyse-btn" class="primary-btn" onclick="analyseFood()">Analyse</button>
+      </div>
+
+      <!-- Result card (hidden until analysis done) -->
+      <div id="result-card" class="result-card" style="display:none;">
+        <div class="result-header">
+          <div class="result-food-name" id="result-food-name"></div>
+          <div class="result-serving" id="result-serving"></div>
+        </div>
+
+        <div class="macro-grid">
+          <div class="macro-item calories">
+            <div class="macro-value" id="res-calories">—</div>
+            <div class="macro-label">kcal</div>
+          </div>
+          <div class="macro-item protein">
+            <div class="macro-value" id="res-protein">—</div>
+            <div class="macro-label">Protein</div>
+          </div>
+          <div class="macro-item carbs">
+            <div class="macro-value" id="res-carbs">—</div>
+            <div class="macro-label">Carbs</div>
+          </div>
+          <div class="macro-item fat">
+            <div class="macro-value" id="res-fat">—</div>
+            <div class="macro-label">Fat</div>
+          </div>
+          <div class="macro-item fiber">
+            <div class="macro-value" id="res-fiber">—</div>
+            <div class="macro-label">Fiber</div>
+          </div>
+        </div>
+
+        <div id="result-highlights" class="highlights"></div>
+        <div id="result-warning" class="warning-box" style="display:none;"></div>
+
+        <button class="log-btn" onclick="logMeal()">+ Log this meal</button>
+      </div>
+
+      <div id="log-status" class="log-status" style="display:none;"></div>
+    </section>
+
+    <!-- ── TODAY TAB ── -->
+    <section id="tab-today" class="tab-content">
+      <div class="screen-header">
+        <h1>Today</h1>
+        <button class="suggest-btn" onclick="getSuggestion()">💡 Suggest</button>
+      </div>
+
+      <!-- Daily progress -->
+      <div class="progress-card">
+        <div class="progress-row">
+          <span class="progress-label">Calories</span>
+          <span class="progress-numbers"><span id="today-cal">0</span> / <span id="goal-cal">2000</span> kcal</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar calories-bar" id="bar-cal"></div></div>
+
+        <div class="progress-row">
+          <span class="progress-label">Protein</span>
+          <span class="progress-numbers"><span id="today-pro">0</span> / <span id="goal-pro">50</span> g</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar protein-bar" id="bar-pro"></div></div>
+
+        <div class="progress-row">
+          <span class="progress-label">Carbs</span>
+          <span class="progress-numbers"><span id="today-carb">0</span> / <span id="goal-carb">250</span> g</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar carbs-bar" id="bar-carb"></div></div>
+
+        <div class="progress-row">
+          <span class="progress-label">Fat</span>
+          <span class="progress-numbers"><span id="today-fat">0</span> / <span id="goal-fat">65</span> g</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar fat-bar" id="bar-fat"></div></div>
+      </div>
+
+      <div id="suggestion-box" class="suggestion-box" style="display:none;"></div>
+
+      <!-- Today's meals list -->
+      <div class="section-title">Meals logged today</div>
+      <ul id="today-list" class="meal-list">
+        <li class="empty-state">No meals logged today.</li>
+      </ul>
+    </section>
+
+    <!-- ── HISTORY TAB ── -->
+    <section id="tab-history" class="tab-content">
+      <div class="screen-header">
+        <h1>History</h1>
+      </div>
+      <ul id="history-list" class="meal-list">
+        <li class="empty-state">No meals logged yet.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

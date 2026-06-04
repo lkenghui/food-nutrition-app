@@ -75,12 +75,22 @@ def log(req: LogRequest):
     return {"id": meal_id}
 
 
+def _serialise(rows):
+    """Convert RealDictRow list to plain dicts, making datetimes JSON-safe."""
+    result = []
+    for r in rows:
+        d = dict(r)
+        if hasattr(d.get("logged_at"), "isoformat"):
+            d["logged_at"] = d["logged_at"].isoformat()
+        result.append(d)
+    return result
+
+
 @app.get("/api/today")
 def today(day: str = Query(default="")):
     if not day:
         day = date.today().isoformat()
-    rows = get_meals_for_date(day)
-    meals = [dict(r) for r in rows]
+    meals = _serialise(get_meals_for_date(day))
     totals = {k: sum(m.get(k) or 0 for m in meals)
               for k in ("calories", "protein_g", "carbs_g", "fat_g", "fiber_g")}
     return {"day": day, "meals": meals, "totals": totals, "goals": DEFAULT_GOALS}
@@ -88,8 +98,7 @@ def today(day: str = Query(default="")):
 
 @app.get("/api/history")
 def history():
-    rows = get_recent_meals(30)
-    return [dict(r) for r in rows]
+    return _serialise(get_recent_meals(30))
 
 
 @app.delete("/api/meal/{meal_id}")

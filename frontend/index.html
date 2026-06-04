@@ -6,13 +6,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Nutrition" />
-  <meta name="theme-color" content="#0f1117" />
+  <meta name="theme-color" content="#0d0f1a" />
   <title>Food Nutrition</title>
   <link rel="manifest" href="/static/manifest.json" />
   <link rel="apple-touch-icon" href="/static/icon-192.png" />
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
+
   <!-- Tab bar -->
   <nav class="tab-bar">
     <button class="tab active" data-tab="log" onclick="switchTab('log')">
@@ -27,22 +28,45 @@
       <span class="tab-icon">📋</span>
       <span class="tab-label">History</span>
     </button>
+    <button class="tab" data-tab="profile" onclick="switchTab('profile')">
+      <span class="tab-icon">👤</span>
+      <span class="tab-label">Profile</span>
+    </button>
   </nav>
 
   <main class="app">
 
-    <!-- ── LOG TAB ── -->
+    <!-- ══ LOG TAB ══════════════════════════════════════════════════════════ -->
     <section id="tab-log" class="tab-content active">
       <div class="screen-header">
-        <h1>What did you eat?</h1>
+        <div>
+          <h1 class="screen-title">Track Food</h1>
+          <p class="screen-sub">Type or snap a photo</p>
+        </div>
       </div>
 
       <div class="input-card">
-        <textarea id="food-input"
-          placeholder="e.g. 2 scrambled eggs and toast with butter&#10;or: large Big Mac meal with Coke"
-          rows="3"></textarea>
+        <!-- Text input area -->
+        <div class="input-area">
+          <textarea id="food-input"
+            placeholder="e.g. 2 scrambled eggs and toast with butter&#10;or: large Big Mac meal with Coke"
+            rows="3"></textarea>
+          <button class="camera-btn" onclick="triggerCamera()" title="Take photo">
+            📷
+          </button>
+        </div>
+        <!-- Hidden camera input -->
+        <input type="file" id="camera-input" accept="image/*" capture="environment"
+          style="display:none" onchange="handlePhoto(event)" />
+
+        <!-- Photo preview -->
+        <div id="photo-preview-wrap" style="display:none;">
+          <img id="photo-preview" class="photo-preview" alt="Food photo" />
+          <button class="remove-photo-btn" onclick="removePhoto()">✕ Remove</button>
+        </div>
+
         <div class="meal-type-row">
-          <label class="meal-type-label">Meal</label>
+          <span class="meal-type-label">Meal</span>
           <div class="meal-chips">
             <button class="chip active" data-type="breakfast" onclick="selectMealType(this)">Breakfast</button>
             <button class="chip" data-type="lunch" onclick="selectMealType(this)">Lunch</button>
@@ -50,10 +74,13 @@
             <button class="chip" data-type="snack" onclick="selectMealType(this)">Snack</button>
           </div>
         </div>
-        <button id="analyse-btn" class="primary-btn" onclick="analyseFood()">Analyse</button>
+
+        <button id="analyse-btn" class="primary-btn" onclick="analyseFood()">
+          <span id="analyse-btn-text">✨ Analyse</span>
+        </button>
       </div>
 
-      <!-- Result card (hidden until analysis done) -->
+      <!-- Result card -->
       <div id="result-card" class="result-card" style="display:none;">
         <div class="result-header">
           <div class="result-food-name" id="result-food-name"></div>
@@ -61,23 +88,23 @@
         </div>
 
         <div class="macro-grid">
-          <div class="macro-item calories">
+          <div class="macro-item cal-item">
             <div class="macro-value" id="res-calories">—</div>
             <div class="macro-label">kcal</div>
           </div>
-          <div class="macro-item protein">
+          <div class="macro-item pro-item">
             <div class="macro-value" id="res-protein">—</div>
             <div class="macro-label">Protein</div>
           </div>
-          <div class="macro-item carbs">
+          <div class="macro-item carb-item">
             <div class="macro-value" id="res-carbs">—</div>
             <div class="macro-label">Carbs</div>
           </div>
-          <div class="macro-item fat">
+          <div class="macro-item fat-item">
             <div class="macro-value" id="res-fat">—</div>
             <div class="macro-label">Fat</div>
           </div>
-          <div class="macro-item fiber">
+          <div class="macro-item fib-item">
             <div class="macro-value" id="res-fiber">—</div>
             <div class="macro-label">Fiber</div>
           </div>
@@ -86,63 +113,196 @@
         <div id="result-highlights" class="highlights"></div>
         <div id="result-warning" class="warning-box" style="display:none;"></div>
 
-        <button class="log-btn" onclick="logMeal()">+ Log this meal</button>
+        <button class="log-btn" onclick="logMeal()">＋ Log this meal</button>
       </div>
 
       <div id="log-status" class="log-status" style="display:none;"></div>
     </section>
 
-    <!-- ── TODAY TAB ── -->
+    <!-- ══ TODAY TAB ════════════════════════════════════════════════════════ -->
     <section id="tab-today" class="tab-content">
       <div class="screen-header">
-        <h1>Today</h1>
+        <div>
+          <h1 class="screen-title">Today</h1>
+          <p class="screen-sub" id="today-date"></p>
+        </div>
         <button class="suggest-btn" onclick="getSuggestion()">💡 Suggest</button>
       </div>
 
-      <!-- Daily progress -->
-      <div class="progress-card">
-        <div class="progress-row">
-          <span class="progress-label">Calories</span>
-          <span class="progress-numbers"><span id="today-cal">0</span> / <span id="goal-cal">2000</span> kcal</span>
+      <!-- Calorie ring -->
+      <div class="calorie-ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 120 120">
+            <circle class="ring-track" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" id="ring-cal-fill" cx="60" cy="60" r="50"
+              stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-value" id="ring-cal-value">0</div>
+            <div class="ring-unit">kcal</div>
+            <div class="ring-goal-label">of <span id="ring-cal-goal">2000</span></div>
+          </div>
         </div>
-        <div class="progress-bar-wrap"><div class="progress-bar calories-bar" id="bar-cal"></div></div>
-
-        <div class="progress-row">
-          <span class="progress-label">Protein</span>
-          <span class="progress-numbers"><span id="today-pro">0</span> / <span id="goal-pro">50</span> g</span>
+        <div class="ring-macros">
+          <div class="ring-macro pro-macro">
+            <div class="rm-bar-wrap"><div class="rm-bar pro-bar" id="rm-bar-pro"></div></div>
+            <div class="rm-value" id="rm-pro">0g</div>
+            <div class="rm-label">Protein</div>
+          </div>
+          <div class="ring-macro carb-macro">
+            <div class="rm-bar-wrap"><div class="rm-bar carb-bar" id="rm-bar-carb"></div></div>
+            <div class="rm-value" id="rm-carb">0g</div>
+            <div class="rm-label">Carbs</div>
+          </div>
+          <div class="ring-macro fat-macro">
+            <div class="rm-bar-wrap"><div class="rm-bar fat-bar" id="rm-bar-fat"></div></div>
+            <div class="rm-value" id="rm-fat">0g</div>
+            <div class="rm-label">Fat</div>
+          </div>
+          <div class="ring-macro fib-macro">
+            <div class="rm-bar-wrap"><div class="rm-bar fib-bar" id="rm-bar-fib"></div></div>
+            <div class="rm-value" id="rm-fib">0g</div>
+            <div class="rm-label">Fiber</div>
+          </div>
         </div>
-        <div class="progress-bar-wrap"><div class="progress-bar protein-bar" id="bar-pro"></div></div>
-
-        <div class="progress-row">
-          <span class="progress-label">Carbs</span>
-          <span class="progress-numbers"><span id="today-carb">0</span> / <span id="goal-carb">250</span> g</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar carbs-bar" id="bar-carb"></div></div>
-
-        <div class="progress-row">
-          <span class="progress-label">Fat</span>
-          <span class="progress-numbers"><span id="today-fat">0</span> / <span id="goal-fat">65</span> g</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar fat-bar" id="bar-fat"></div></div>
       </div>
 
       <div id="suggestion-box" class="suggestion-box" style="display:none;"></div>
 
-      <!-- Today's meals list -->
-      <div class="section-title">Meals logged today</div>
+      <div class="section-title">Meals today</div>
       <ul id="today-list" class="meal-list">
         <li class="empty-state">No meals logged today.</li>
       </ul>
     </section>
 
-    <!-- ── HISTORY TAB ── -->
+    <!-- ══ HISTORY TAB ══════════════════════════════════════════════════════ -->
     <section id="tab-history" class="tab-content">
       <div class="screen-header">
-        <h1>History</h1>
+        <div>
+          <h1 class="screen-title">History</h1>
+          <p class="screen-sub">Last 30 meals</p>
+        </div>
       </div>
       <ul id="history-list" class="meal-list">
         <li class="empty-state">No meals logged yet.</li>
       </ul>
+    </section>
+
+    <!-- ══ PROFILE TAB ══════════════════════════════════════════════════════ -->
+    <section id="tab-profile" class="tab-content">
+      <div class="screen-header">
+        <div>
+          <h1 class="screen-title">My Profile</h1>
+          <p class="screen-sub">Personalise your daily goals</p>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-section-title">About You</div>
+
+        <div class="form-row">
+          <label class="form-label">Gender</label>
+          <div class="gender-chips">
+            <button class="chip active" data-gender="male" onclick="selectGender(this)">Male</button>
+            <button class="chip" data-gender="female" onclick="selectGender(this)">Female</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="p-age">Age</label>
+          <div class="form-input-wrap">
+            <input type="number" id="p-age" class="form-input" min="10" max="100" placeholder="25" />
+            <span class="form-unit">years</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="p-weight">Weight</label>
+          <div class="form-input-wrap">
+            <input type="number" id="p-weight" class="form-input" min="20" max="300" placeholder="70" />
+            <span class="form-unit">kg</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label" for="p-height">Height</label>
+          <div class="form-input-wrap">
+            <input type="number" id="p-height" class="form-input" min="100" max="250" placeholder="170" />
+            <span class="form-unit">cm</span>
+          </div>
+        </div>
+
+        <div class="form-row activity-row">
+          <label class="form-label">Activity</label>
+          <div class="activity-chips">
+            <button class="chip" data-activity="1.2" onclick="selectActivity(this)">Sedentary</button>
+            <button class="chip active" data-activity="1.375" onclick="selectActivity(this)">Light</button>
+            <button class="chip" data-activity="1.55" onclick="selectActivity(this)">Moderate</button>
+            <button class="chip" data-activity="1.725" onclick="selectActivity(this)">Active</button>
+            <button class="chip" data-activity="1.9" onclick="selectActivity(this)">Very Active</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Goal</label>
+          <div class="goal-chips">
+            <button class="chip active" data-goal="maintain" onclick="selectGoalType(this)">Maintain</button>
+            <button class="chip" data-goal="lose" onclick="selectGoalType(this)">Lose Weight</button>
+            <button class="chip" data-goal="gain" onclick="selectGoalType(this)">Gain Muscle</button>
+          </div>
+        </div>
+
+        <button class="primary-btn" onclick="calculateGoals()" style="margin-top:0.5rem;">
+          Calculate My Goals
+        </button>
+      </div>
+
+      <!-- Recommended goals output -->
+      <div id="goals-result" class="goals-result" style="display:none;">
+        <div class="goals-result-title">📌 Your Recommended Daily Goals</div>
+        <div class="goals-grid">
+          <div class="goal-item cal-item">
+            <div class="goal-value" id="g-calories">—</div>
+            <div class="goal-label">Calories</div>
+          </div>
+          <div class="goal-item pro-item">
+            <div class="goal-value" id="g-protein">—</div>
+            <div class="goal-label">Protein</div>
+          </div>
+          <div class="goal-item carb-item">
+            <div class="goal-value" id="g-carbs">—</div>
+            <div class="goal-label">Carbs</div>
+          </div>
+          <div class="goal-item fat-item">
+            <div class="goal-value" id="g-fat">—</div>
+            <div class="goal-label">Fat</div>
+          </div>
+          <div class="goal-item fib-item">
+            <div class="goal-value" id="g-fiber">—</div>
+            <div class="goal-label">Fiber</div>
+          </div>
+        </div>
+        <div class="bmr-note" id="bmr-note"></div>
+        <button class="log-btn" onclick="applyGoals()">✓ Apply These Goals</button>
+      </div>
+
+      <!-- Reference info -->
+      <div class="reference-card">
+        <div class="profile-section-title">📚 Daily Reference Values</div>
+        <div class="reference-table">
+          <div class="ref-row header-row">
+            <span>Nutrient</span><span>Men</span><span>Women</span>
+          </div>
+          <div class="ref-row"><span>Calories</span><span>2,000–2,500</span><span>1,600–2,000</span></div>
+          <div class="ref-row"><span>Protein</span><span>56g</span><span>46g</span></div>
+          <div class="ref-row"><span>Carbs</span><span>225–325g</span><span>225–325g</span></div>
+          <div class="ref-row"><span>Fat</span><span>44–78g</span><span>44–78g</span></div>
+          <div class="ref-row"><span>Fiber</span><span>38g</span><span>25g</span></div>
+          <div class="ref-row"><span>Sodium</span><span colspan="2">&lt; 2,300mg</span></div>
+          <div class="ref-row"><span>Sugar</span><span colspan="2">&lt; 50g added</span></div>
+        </div>
+        <p class="ref-note">Based on WHO & dietary reference intakes for adults aged 19–50. Individual needs vary.</p>
+      </div>
     </section>
 
   </main>

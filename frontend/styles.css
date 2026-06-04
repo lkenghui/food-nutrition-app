@@ -24,17 +24,31 @@ html, body {
   font-family: -apple-system, 'Segoe UI', sans-serif;
 }
 
-/* ── Tab bar ─────────────────────────────────────────────────────────────── */
-.tab-bar {
+/* ── Top header + tab bar ────────────────────────────────────────────────── */
+.top-header {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  display: flex;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border);
-  padding-bottom: var(--safe-bottom);
+  top: 0; left: 0; right: 0;
   z-index: 100;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  padding-top: var(--safe-top);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem 0.3rem;
+}
+.app-logo { font-size: 1.4rem; line-height: 1; }
+.app-name  { font-size: 1.05rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+
+.tab-bar {
+  display: flex;
+  background: transparent;
+  padding: 0 0.25rem;
 }
 .tab {
   flex: 1;
@@ -42,28 +56,21 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 10px 0 8px;
+  padding: 6px 0 8px;
   background: none;
   border: none;
+  border-bottom: 2.5px solid transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
   position: relative;
 }
-.tab.active { color: var(--green); }
-.tab.active::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 25%; right: 25%;
-  height: 2.5px;
-  background: var(--green);
-  border-radius: 0 0 4px 4px;
-}
-.tab-icon { font-size: 1.35rem; line-height: 1; }
-.tab-label { font-size: 0.68rem; font-weight: 600; }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-icon  { font-size: 1.2rem; line-height: 1; }
+.tab-label { font-size: 0.65rem; font-weight: 700; }
 
 /* ── App layout ──────────────────────────────────────────────────────────── */
-.app { padding-bottom: calc(68px + var(--safe-bottom)); min-height: 100vh; }
+.app { padding-top: 96px; min-height: 100vh; }
 .tab-content { display: none; padding: 1rem; }
 .tab-content.active { display: block; }
 
@@ -72,8 +79,7 @@ html, body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.1rem;
-  padding-top: calc(var(--safe-top) + 0.5rem);
+  margin-bottom: 1rem;
 }
 .screen-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
 .screen-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
@@ -116,19 +122,52 @@ html, body {
   box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
   background: #fff;
 }
-.camera-btn {
-  flex-shrink: 0;
-  width: 48px; height: 48px;
+/* ── Camera card ─────────────────────────────────────────────────────────── */
+.camera-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
   border: none;
-  border-radius: 12px;
-  font-size: 1.4rem;
+  border-radius: 20px;
+  padding: 1.1rem 1.25rem;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
-  transition: transform 0.15s;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-bottom: 0.5rem;
 }
-.camera-btn:active { transform: scale(0.92); }
+.camera-card:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(99,102,241,0.25); }
+
+.camera-card-icon {
+  flex-shrink: 0;
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.camera-card-icon svg { width: 26px; height: 26px; color: #fff; }
+
+.camera-card-text { flex: 1; }
+.camera-card-title { font-size: 1rem; font-weight: 800; color: #fff; }
+.camera-card-sub   { font-size: 0.78rem; color: rgba(255,255,255,0.75); margin-top: 2px; }
+.camera-card-arrow { font-size: 1.6rem; color: rgba(255,255,255,0.6); font-weight: 300; }
+
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.divider-row::before, .divider-row::after {
+  content: ""; flex: 1;
+  height: 1px; background: var(--border);
+}
 
 .photo-preview {
   width: 100%;

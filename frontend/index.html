@@ -14,25 +14,31 @@
 </head>
 <body>
 
-  <!-- Tab bar -->
-  <nav class="tab-bar">
-    <button class="tab active" data-tab="log" onclick="switchTab('log')">
-      <span class="tab-icon">🍽️</span>
-      <span class="tab-label">Log</span>
-    </button>
-    <button class="tab" data-tab="today" onclick="switchTab('today')">
-      <span class="tab-icon">📊</span>
-      <span class="tab-label">Today</span>
-    </button>
-    <button class="tab" data-tab="history" onclick="switchTab('history')">
-      <span class="tab-icon">📋</span>
-      <span class="tab-label">History</span>
-    </button>
-    <button class="tab" data-tab="profile" onclick="switchTab('profile')">
-      <span class="tab-icon">👤</span>
-      <span class="tab-label">Profile</span>
-    </button>
-  </nav>
+  <!-- Top header + tab bar -->
+  <header class="top-header">
+    <div class="app-brand">
+      <span class="app-logo">🥗</span>
+      <span class="app-name">NutriTrack</span>
+    </div>
+    <nav class="tab-bar">
+      <button class="tab active" data-tab="log" onclick="switchTab('log')">
+        <span class="tab-icon">🍽️</span>
+        <span class="tab-label">Log</span>
+      </button>
+      <button class="tab" data-tab="today" onclick="switchTab('today')">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">Today</span>
+      </button>
+      <button class="tab" data-tab="history" onclick="switchTab('history')">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">History</span>
+      </button>
+      <button class="tab" data-tab="profile" onclick="switchTab('profile')">
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">Profile</span>
+      </button>
+    </nav>
+  </header>
 
   <main class="app">
 
@@ -40,10 +46,27 @@
     <section id="tab-log" class="tab-content active">
       <div class="screen-header">
         <div>
-          <h1 class="screen-title">Track Food</h1>
-          <p class="screen-sub">Type or snap a photo</p>
+          <h1 class="screen-title">My Daily Nutrition</h1>
+          <p class="screen-sub">Type a meal or snap a photo</p>
         </div>
       </div>
+
+      <!-- Camera shortcut card -->
+      <button class="camera-card" onclick="triggerCamera()">
+        <div class="camera-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <div class="camera-card-text">
+          <div class="camera-card-title">Snap a Photo</div>
+          <div class="camera-card-sub">AI identifies food &amp; nutrition instantly</div>
+        </div>
+        <div class="camera-card-arrow">›</div>
+      </button>
+
+      <div class="divider-row"><span>or type it in</span></div>
 
       <div class="input-card">
         <!-- Text input area -->
@@ -51,9 +74,6 @@
           <textarea id="food-input"
             placeholder="e.g. 2 scrambled eggs and toast with butter&#10;or: large Big Mac meal with Coke"
             rows="3"></textarea>
-          <button class="camera-btn" onclick="triggerCamera()" title="Take photo">
-            📷
-          </button>
         </div>
         <!-- Hidden camera input -->
         <input type="file" id="camera-input" accept="image/*" capture="environment"
